@@ -31,7 +31,8 @@
   height: 100%;
   text-align: center;
   border: none;
-  outline: 1px solid grey;
+  border: 1px solid black;
+  border-collapse: collapse;
 }
 
 /*  vertical borders */
@@ -101,7 +102,11 @@
   border-top: 2px solid black;
 }
 
+.odd {
+  background-color:  rgb(184, 172, 172) !important;
+}
 
+/*  removing selector arrows from each input element */
 
 .grid > input::-webkit-outer-spin-button,
 .grid > input::-webkit-inner-spin-button {
@@ -111,6 +116,5 @@
 
 
 .grid > input:hover {
-  background-color: rgb(101, 101, 190);
-  transform: scale(.99);
+  background-color: rgb(101, 101, 190) !important;
 }
