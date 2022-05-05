@@ -1,38 +1,116 @@
+*, *::after, *::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  background-color: lightpink;
+  width: 100vw;
+  height: 100vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center;
 }
 
-.App-link {
-  color: #61dafb;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-auto-rows: repeat(9, 1fr);
+  width: 70vmin;
+  height: 70vmin;
+  background-color:white;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.grid > input {
+  background-color: transparent;
+  outline: none;
+  font-size: 2rem;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  border: none;
+  outline: 1px solid grey;
+}
+
+/*  vertical borders */
+ 
+.grid > input:nth-of-type(9n + 3) {
+  border-right: 2px solid black;
+  /* background-color: lightpink; */
+}
+
+.grid > input:nth-of-type(9n ) {
+  border-right: 2px solid black;
+
+}
+
+.grid > input:nth-of-type(9n + 6) {
+  border-right: 2px solid black;
+}
+
+.grid > input:nth-of-type(9n - 8) {
+  border-left: 2px solid black;
+}
+
+/*  horizontial borders */
+
+
+.grid > input:nth-of-type(n + 73) {
+  border-bottom: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 1) {
+  border-top: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 1) {
+  border-top: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 2) {
+  border-top: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 3) {
+  border-top: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 4) {
+  border-top: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 5) {
+  border-top: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 6) {
+  border-top: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 7) {
+  border-top: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 8) {
+  border-top: 2px solid black;
+}
+
+.grid > input:nth-of-type(27n + 9) {
+  border-top: 2px solid black;
+}
+
+
+
+.grid > input::-webkit-outer-spin-button,
+.grid > input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+.grid > input:hover {
+  background-color: rgb(101, 101, 190);
+  transform: scale(.99);
 }
