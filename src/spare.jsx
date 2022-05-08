@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from "react"
+/* import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
-import Cell from "./Cell"
-
 
 export default function Grid() {
   const [data, setData] = useState([])
-
   // const ref = useRef()
   // for every input make sure only one number per an input field can be entered
   const checkInput = (e) => {
@@ -13,7 +10,6 @@ export default function Grid() {
       e.target.value = e.target.value.slice(0, 1)
     }
   }
-
 
   // Driver function for the grid
   const grid = document.querySelectorAll(".grid input")
@@ -52,7 +48,7 @@ export default function Grid() {
         item.forEach((item2, index2) => {
           if (item2 === 0) {
             board[index][index2] = ""
-          } 
+          }
         })
       })
       setData(board)
@@ -60,31 +56,30 @@ export default function Grid() {
     )
   }, [])
 
-  const inputs = []
+  console.log(data)
+  let inputs = []
+  
+  console.log(inputs)
+  
   data.forEach((row, i) => {
     row.forEach((item, j) => {
-      inputs.push(
-        <Cell key={`${i}${j}`}
-          val={item}
-          className={sudoku[i][j] === 1 ? "odd" : ""}
-          grayArea = {sudoku[i][j] === 1 ? true : false}
-        />
-      )
-    }
-    )
-  }
-  )
+        inputs.push(
+            <input
+                key={`${i}${j}`}
+                type="number"
+                className={sudoku[i][j] === 1 ? "odd" : ""}
+                min={1}
+                max={9}
+                value={item}
+                onChange={(e) => {
+                    data[i][j] = e.target.value
+                    console.log(data[i][j] )
+                }
+                }
+            />
+        )
+    })
+})
 
-  return (
-    <div className="grid">
-      {inputs}
-    </div>
-  )
-}
-
-
-
-
-
-
-
+return <div className="grid">{inputs}</div>
+} */
