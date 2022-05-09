@@ -1,22 +1,23 @@
-import React, {  useState } from 'react'
+import React, { useState } from 'react'
 
-export default function Cell({val, grayArea}) {
+export default function Cell({ val, grayArea }) {
     const [value, setValue] = useState(val)
-    const [colored, setColored] = useState(false)
+    const [colored, setColored] = useState('')
     const handleChange = (e) => {
         setValue(e.target.value)
-        setColored(true)
+        setColored('userinput')
     }
 
 
     return (
         <input
-          type="number"
-          min="1"
-          max="9"
-          onChange={handleChange}
-          value={value}
-          className={grayArea ? 'odd' : "" ||  colored ? "userinput" : "" && val !== 0 ? "colored" : ""}
+            type="number"
+            min="1"
+            max="9"
+            onChange={handleChange}
+            value={value}
+            className={`${grayArea} ${colored}`}
+            disabled={value !== '' ? true : false}
         />
     )
 }
