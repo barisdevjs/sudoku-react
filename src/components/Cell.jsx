@@ -12,9 +12,9 @@ export default function Cell({ val, grayArea }) {
     return (
         <input
             type="number"
-            min="1"
+            min="1" 
             max="9"
-            onChange={handleChange}
+            onChange={handleChange} 
             value={value}
             className={`${grayArea} ${colored}`}
             disabled={value !== '' ? true : false}
