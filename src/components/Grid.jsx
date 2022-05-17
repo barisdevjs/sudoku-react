@@ -1,10 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
 import Cell from "./Cell"
+import {checker, sudoku , encodeParams} from "../helpers/helper"
 
 
 export default function Grid() {
   const [data, setData] = useState([])
+  const [grade, setGrade] = useState('Random')
+  const [status, setStatus] = useState(null)
+  const [solved, setSolved] = useState(false)
+  const [flag ,setFlag] = useState(false)
 
 
   const checkInput = (e) => {
@@ -29,26 +35,14 @@ export default function Grid() {
       });
 
     }
-  }, [data, grid])
+  }, [grid])
 
-  // styling for grid element
 
-  let sudoku = [
-    [1, 1, 1, 0, 0, 0, 1, 1, 1],
-    [1, 1, 1, 0, 0, 0, 1, 1, 1],
-    [1, 1, 1, 0, 0, 0, 1, 1, 1],
-    [0, 0, 0, 1, 1, 1, 0, 0, 0],
-    [0, 0, 0, 1, 1, 1, 0, 0, 0],
-    [0, 0, 0, 1, 1, 1, 0, 0, 0],
-    [1, 1, 1, 0, 0, 0, 1, 1, 1],
-    [1, 1, 1, 0, 0, 0, 1, 1, 1],
-    [1, 1, 1, 0, 0, 0, 1, 1, 1],
-  ]
+  // replace every zero with a blank space
 
   useEffect(() => {
     apiRequest().then((res) => {
       const board = res.board
-      // replace every zero with a blank space
       board.forEach((item, index) => {
         item.forEach((item2, index2) => {
           if (item2 === 0) {
@@ -59,7 +53,8 @@ export default function Grid() {
       setData(board)
     })
 
-  }, [])
+  }, [solved])
+
 
   const inputs = []
   data.forEach((row, i) => {
@@ -79,40 +74,76 @@ export default function Grid() {
     })
   })
 
-  // write function for getting the data from the grid and console.logging it
+  // getting for the latest data from grid board
 
-  const sendData = () => {
-    let data1 = {data}
-    console.log(data1)
-    return data1
+  const getData = () => {
+    const data = []
+    grid.forEach((item, idx) => {
+      // make 9 * 9 array
+      if (idx % 9 === 0) {
+        data.push([])
+      }
+      data[Math.floor(idx / 9)].push(Number(item.value))
+    })
+    return data
+
   }
 
-    /*************  For Solution   *******************/
-
-    const encodeBoard = (board) => board.reduce((result, row, i) => result + `%5B${encodeURIComponent(row)}%5D${i === board.length - 1 ? '' : '%2C'}`, '')
-
-    const encodeParams = (params) =>
-      Object.keys(params)
-        .map(key => key + '=' + encodeBoard(params[key]))
 
 
-    const getSolution = async () => {
-      const response = await fetch('https://sugoku.herokuapp.com/solve', {
+
+  const getSolution = async () => {
+    const board = getData()
+    const response = await fetch('https://sugoku.herokuapp.com/solve', {
+      method: 'POST',
+      body: encodeParams({ board }),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
+    const data = await response.json()
+    console.log(data.solution)
+    const flagTemp = await checker(data.solution)
+    setData(data.solution)
+    setSolved(true)
+    setFlag(flagTemp)
+    return data.solution 
+  }
+
+
+  useEffect(() => {
+    const getGrade = async () => {
+      const board = getData()
+      const response = await fetch('https://sugoku.herokuapp.com/grade', {
         method: 'POST',
-        body: encodeParams(sendData()),
+        body: encodeParams({ board }),
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       })
       const data = await response.json()
-      console.log(data.solution)
-      return data
+      setGrade(data.difficulty)
     }
-    getSolution()
+    getGrade()
+  }, [encodeParams, getData])
 
+  const validateSolution = async () => {
+    const response = await fetch('https://sugoku.herokuapp.com/validate', {
+      method: 'POST',
+      body: encodeParams(getData()),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
+    const data = await response.json()
+    setStatus(data.status)
+    return data.status
+  }
+
+      
   return (
     <>
-      <button onClick={sendData}>Send Data</button>
       <div className="grid" >
         {inputs}
+      </div>
+      <div className="buttons">
+        <button onClick={getSolution}>Get Solution</button>
+        <button onClick={validateSolution}>Check Status {status}</button>
+        <p>Level : {grade.slice(0, 1).toUpperCase() + grade.slice(1)}</p>
       </div>
     </>
   )

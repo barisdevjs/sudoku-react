@@ -17,7 +17,7 @@ export default function Cell({ val, grayArea }) {
             onChange={handleChange} 
             value={value}
             className={`${grayArea} ${colored}`}
-            disabled={value !== '' ? true : false}
+            disabled={(value !== '' &&  colored === '') ? true : false}
         />
     )
 }
