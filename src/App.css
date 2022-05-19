@@ -138,3 +138,7 @@
 .userinput {
   color: red !important;
 }
+
+.red {
+  color: greenyellow !important;
+}

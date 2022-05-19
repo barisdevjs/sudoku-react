@@ -86,28 +86,45 @@ export default function Grid() {
       data[Math.floor(idx / 9)].push(Number(item.value))
     })
     return data
-
   }
 
-
-
+  const board = getData()
+  
+  
 
   const getSolution = async () => {
-    const board = getData()
     const response = await fetch('https://sugoku.herokuapp.com/solve', {
       method: 'POST',
       body: encodeParams({ board }),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     })
     const data = await response.json()
-    console.log(data.solution)
-    const flagTemp = await checker(data.solution)
+    const flagTemp = await checker(board)
     setData(data.solution)
     setSolved(true)
     setFlag(flagTemp)
+    compare(data.solution,board)
     return data.solution 
   }
 
+
+  // compare board and data and find the element that is not equal and give them a color of red
+
+  const compare = (data, board) => {
+    const result = []
+    data.forEach((row, i) => {
+      row.forEach((item, j) => {
+        if (item !== board[i][j]) {
+          result.push(item)
+          board[i][j] = item
+          item.classList?.add('red')
+        }
+      })
+    })
+    console.log(result)
+    return result
+  }
+ 
 
   useEffect(() => {
     const getGrade = async () => {
@@ -123,6 +140,8 @@ export default function Grid() {
     getGrade()
   }, [encodeParams, getData])
 
+
+
   const validateSolution = async () => {
     const response = await fetch('https://sugoku.herokuapp.com/validate', {
       method: 'POST',
@@ -134,6 +153,7 @@ export default function Grid() {
     return data.status
   }
 
+
       
   return (
     <>
@@ -143,6 +163,7 @@ export default function Grid() {
       <div className="buttons">
         <button onClick={getSolution}>Get Solution</button>
         <button onClick={validateSolution}>Check Status {status}</button>
+        <button onClick={getData}>Get Latest Data</button>
         <p>Level : {grade.slice(0, 1).toUpperCase() + grade.slice(1)}</p>
       </div>
     </>
