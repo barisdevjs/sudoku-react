@@ -1,25 +1,29 @@
-import React, { useState } from 'react'
+import React, {  useEffect, useRef, useState } from 'react'
 
-export default function Cell({ val, grayArea }) {
-    const [value, setValue] = useState(val)
-    const [colored, setColored] = useState('')
+export default function Cell({ val, grayArea, onChange }) {
+    const [colored, setColored] = useState("");
+    const ref = useRef();
+  
+    useEffect(() => {
+      ref.current.value = val || "";
+    }, [val]);
+  
     const handleChange = (e) => {
-        setValue(e.target.value)
-        setColored('userinput')
-    }
-
-
+      onChange(e);
+      setColored("userinput");
+    };
+  
     return (
-        <input
-            type="number"
-            min="1" 
-            max="9"
-            onChange={handleChange} 
-            value={value}
-            className={`${grayArea} ${colored}`}
-            disabled={(value !== '' &&  colored === '') ? true : false}
-        />
-    )
-}
-
+      <input
+        type="number"
+        min="1"
+        max="9"
+        ref={ref}
+        onChange={handleChange}
+        className={`${grayArea} ${colored}`}
+        disabled={val !== "" && colored === ""}
+      />
+    );
+  }
+  
 

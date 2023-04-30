@@ -10,7 +10,9 @@
   width: 100vw;
   height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: space-evenly;
+  gap:2rem;
   align-items: center;
 }
 
@@ -18,12 +20,13 @@
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  width: 10vw;
-  height: 70vh;
+  width: 70vmin;
+  height: 70vmin;
   background-color: lightblue;
 }
 
 .grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
@@ -35,7 +38,7 @@
 .grid > input {
   background-color: transparent;
   outline: none;
-  font-size: 2rem;
+  font-size: 1.5rem;
   width: 100%;
   height: 100%;
   text-align: center;
@@ -141,4 +144,43 @@
 
 .red {
   color: greenyellow !important;
+}
+
+
+.lds-hourglass {
+  position: absolute; /* Position the element */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: inline-block;
+  width: 70vw;
+  height: 70vh;
+}
+
+
+.lds-hourglass:after {
+  content: " ";
+  display: flex;
+  border-radius: 50%;
+  width: 0;
+  height: 0;
+  transform: translate(50%,50%);
+  box-sizing: border-box;
+  border: 32px solid #fff;
+  border-color: #fff transparent #fff transparent;
+  animation: lds-hourglass 1.2s infinite;
+}
+@keyframes lds-hourglass {
+  0% {
+    transform: rotate(0);
+    animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  }
+  50% {
+    transform: rotate(900deg);
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  100% {
+    transform: rotate(1800deg);
+  }
 }

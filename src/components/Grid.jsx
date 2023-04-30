@@ -1,16 +1,23 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
+
 import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
 import Cell from "./Cell"
-import {checker, sudoku , encodeParams} from "../helpers/helper"
+import { checker, sudoku, encodeParams } from "../helpers/helper"
+import '../App.css'
 
 
 export default function Grid() {
-  const [data, setData] = useState([])
-  const [grade, setGrade] = useState('Random')
-  const [status, setStatus] = useState(null)
-  const [solved, setSolved] = useState(false)
-  const [flag ,setFlag] = useState(false)
+  const [data, setData] = useState(Array.from(Array(9), () => Array(9).fill(undefined)));
+  const [solution, setSolution] = useState(Array.from(Array(9), () => Array(9).fill('')));
+  const [grade, setGrade] = useState('Random');
+  const [flag, setFlag] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [inputs, setInputs] = useState(null);
+  const [loading, setLoading] = useState(true);
+  // console.log(solution)
+  console.log('data', data)
 
 
   const checkInput = (e) => {
@@ -20,14 +27,13 @@ export default function Grid() {
   }
 
 
-  // Driver function for the grid
   const grid = document.querySelectorAll(".grid input")
-
+  // Driver function for the grid
+  
   useEffect(() => {
     grid.forEach((item) => {
       item.addEventListener("input", checkInput);
     })
-
 
     return () => {
       grid.forEach((item) => {
@@ -37,12 +43,23 @@ export default function Grid() {
     }
   }, [grid])
 
+  useEffect(() => {
+    setInputs(render(data))
+  }, [])
+
+  const handleChange = (e, i, j) => {
+    const newData = [...data];
+    newData[i][j] = Number(e.target.value);
+    setData(newData);
+  }
 
   // replace every zero with a blank space
 
   useEffect(() => {
-    apiRequest().then((res) => {
-      const board = res.board
+    const fetchData = async () => {
+      console.log('dsds')
+      const result = await apiRequest()
+      const board = result.board
       board.forEach((item, index) => {
         item.forEach((item2, index2) => {
           if (item2 === 0) {
@@ -51,28 +68,25 @@ export default function Grid() {
         })
       })
       setData(board)
-    })
+      setInputs(render(board))
+      setLoading(false);
+    }
+    fetchData()
+  }, [])
 
-  }, [solved])
 
-
-  const inputs = []
-  data.forEach((row, i) => {
-    row.forEach((item, j) => {
-      inputs.push(
-        <Cell key={`${i}${j}`}
+  function render(board) {
+    return board.map((row, i) =>
+      row.map((item, j) => (
+        <Cell
+          key={`${i}${j}`}
           val={item}
           grayArea={sudoku[i][j] === 1 ? 'odd' : ''}
-          onChange={(e) => {
-            setData(
-              data[i][j] = e.target.value
-            )
-          }
-          }
+          onChange={(e) => handleChange(e, i, j)}
         />
-      )
-    })
-  })
+      ))
+    );
+  }
 
   // getting for the latest data from grid board
 
@@ -88,62 +102,46 @@ export default function Grid() {
     return data
   }
 
-  const board = getData()
-  
-  
+  const board = getData();
+
 
   const getSolution = async () => {
-    const response = await fetch('https://sugoku.herokuapp.com/solve', {
+    const response = await fetch('https://sugoku.onrender.com/solve', {
       method: 'POST',
       body: encodeParams({ board }),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    })
-    const data = await response.json()
-    const flagTemp = await checker(board)
-    setData(data.solution)
-    setSolved(true)
-    setFlag(flagTemp)
-    compare(data.solution,board)
-    return data.solution 
-  }
+    });
+    const data = await response.json();
+    // const flagTemp = await checker(board);
+    setData(prev => prev = data.solution);
+    setSolution(data.solution);
+    // setFlag(flagTemp);
+    const newInputs = render(data.solution); // render new inputs from solution
+    setInputs(newInputs); // update inputs state with new inputs
+  };
+
 
 
   // compare board and data and find the element that is not equal and give them a color of red
 
-  const compare = (data, board) => {
-    const result = []
-    data.forEach((row, i) => {
-      row.forEach((item, j) => {
-        if (item !== board[i][j]) {
-          result.push(item)
-          board[i][j] = item
-          item.classList?.add('red')
-        }
-      })
-    })
-    console.log(result)
-    return result
-  }
- 
-
-  useEffect(() => {
-    const getGrade = async () => {
-      const board = getData()
-      const response = await fetch('https://sugoku.herokuapp.com/grade', {
-        method: 'POST',
-        body: encodeParams({ board }),
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      })
-      const data = await response.json()
-      setGrade(data.difficulty)
-    }
-    getGrade()
-  }, [encodeParams, getData])
-
+  // const compare = (data, board) => {
+  //   const result = []
+  //   data.forEach((row, i) => {
+  //     row.forEach((item, j) => {
+  //       if (item !== board?.[i]?.[j]) {
+  //         result.push(item)
+  //         board[i][j] = item
+  //         item.classList?.add('red')
+  //       }
+  //     })
+  //   })
+  //   console.log(result)
+  //   return result
+  // }
 
 
   const validateSolution = async () => {
-    const response = await fetch('https://sugoku.herokuapp.com/validate', {
+    const response = await fetch('https://sugoku.onrender.com/validate', {
       method: 'POST',
       body: encodeParams(getData()),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -154,11 +152,11 @@ export default function Grid() {
   }
 
 
-      
+
   return (
     <>
-      <div className="grid" >
-        {inputs}
+      <div className="grid">
+         {inputs} 
       </div>
       <div className="buttons">
         <button onClick={getSolution}>Get Solution</button>
