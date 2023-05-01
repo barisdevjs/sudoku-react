@@ -1,12 +1,10 @@
-const RANDOM = 'random'
+const BASEURL = `https://sugoku.onrender.com/board`;
 
-const BASEURL = `https://sugoku.onrender.com/board?difficulty=${RANDOM}`
+export const apiRequest = async (difficulty) => {
+  const url = difficulty === "random" ? `${BASEURL}` : `${BASEURL}?difficulty=${difficulty}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  return { board: data.board};
+};
 
-
-// Here is correctly setting up the API
- export const apiRequest = async () => {
-    const response = await fetch(BASEURL)
-    const data = await response.json()
-    return { board: data.board}
-}
 

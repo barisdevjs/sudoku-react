@@ -4,20 +4,22 @@
 import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
 import Cell from "./Cell"
-import { checker, sudoku, encodeParams } from "../helpers/helper"
+import { sudoku, encodeParams } from "../helpers/helper"
 import '../App.css'
+
+const difficulties = ["easy", "medium", "hard"]; // available difficulty levels
 
 
 export default function Grid() {
   const [data, setData] = useState(Array.from(Array(9), () => Array(9).fill(undefined)));
   const [solution, setSolution] = useState(Array.from(Array(9), () => Array(9).fill('')));
-  const [grade, setGrade] = useState('Random');
+  const [grade, setGrade] = useState("easy");
   const [flag, setFlag] = useState(false);
-  const [status, setStatus] = useState(null);
+  const [status, setStatus] = useState(""); // solved or unsolvable
   const [inputs, setInputs] = useState(null);
   const [loading, setLoading] = useState(true);
   // console.log(solution)
-  console.log('data', data)
+  // console.log('data', data)
 
 
   const checkInput = (e) => {
@@ -25,7 +27,6 @@ export default function Grid() {
       e.target.value = e.target.value.slice(0, 1)
     }
   }
-
 
   const grid = document.querySelectorAll(".grid input")
   // Driver function for the grid
@@ -39,7 +40,6 @@ export default function Grid() {
       grid.forEach((item) => {
         item.removeEventListener("input", checkInput)
       });
-
     }
   }, [grid])
 
@@ -57,22 +57,26 @@ export default function Grid() {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log('dsds')
-      const result = await apiRequest()
-      const board = result.board
+      setLoading(true);
+      const result = await apiRequest(grade); // pass selected difficulty level to apiRequest function
+      const board = result.board;
       board.forEach((item, index) => {
         item.forEach((item2, index2) => {
           if (item2 === 0) {
-            board[index][index2] = ""
+            board[index][index2] = "";
           }
-        })
-      })
-      setData(board)
-      setInputs(render(board))
+        });
+      });
+      setData(board);
+      setInputs(render(board));
       setLoading(false);
-    }
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, [grade]); // re-fetch data when difficulty level changes
+
+  const handleDifficultyChange = (event) => {
+    setGrade(event.target.value);
+  };
 
 
   function render(board) {
@@ -104,6 +108,8 @@ export default function Grid() {
 
   const board = getData();
 
+  console.log(board)
+
 
   const getSolution = async () => {
     const response = await fetch('https://sugoku.onrender.com/solve', {
@@ -113,6 +119,7 @@ export default function Grid() {
     });
     const data = await response.json();
     // const flagTemp = await checker(board);
+    setStatus(data.status)
     setData(prev => prev = data.solution);
     setSolution(data.solution);
     // setFlag(flagTemp);
@@ -155,14 +162,28 @@ export default function Grid() {
 
   return (
     <>
+      <h2>Sudoku Solver React</h2>
       <div className="grid">
          {inputs} 
       </div>
       <div className="buttons">
         <button onClick={getSolution}>Get Solution</button>
-        <button onClick={validateSolution}>Check Status {status}</button>
-        <button onClick={getData}>Get Latest Data</button>
-        <p>Level : {grade.slice(0, 1).toUpperCase() + grade.slice(1)}</p>
+        <button onClick={validateSolution}>Check Status</button>
+        <button onClick={getData}>Get Hint</button>
+      <div className="difficulty">
+        <label htmlFor="difficulty-select">Difficulty:</label>
+        <select id="difficulty-select" value={grade} onChange={handleDifficultyChange}>
+          {difficulties.map((difficulty) => (
+            <option key={difficulty} value={difficulty}>
+              {difficulty}
+            </option>
+          ))}
+        </select>
+      </div>
+        <div className="grade">{status}</div>
+        <div className="grade">
+        <button>Level : </button>
+        <p>{grade.slice(0, 1).toUpperCase() + grade.slice(1)}</p></div>
       </div>
     </>
   )
