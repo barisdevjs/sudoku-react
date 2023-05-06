@@ -33,3 +33,14 @@ export const checker = async (arr) => {
     Object.keys(params)
       .map(key => key + `=  %5B${encodeBoard(params[key])}%5D`)
       .join('&');
+
+export function bgColor(status) {
+  const statusMap = new Map(
+    [
+    ["unsolved", "gray"],
+    ["unsolvable","red"],
+    ["solved","green"]
+  ]
+  )
+  return statusMap.get(status) || "#1890ff"
+} 

@@ -4,22 +4,19 @@
 import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
 import Cell from "./Cell"
-import { sudoku, encodeParams } from "../helpers/helper"
+import { sudoku, encodeParams, bgColor } from "../helpers/helper"
 import '../App.css'
 
-const difficulties = ["easy", "medium", "hard"]; // available difficulty levels
+const difficulties = ["easy", "medium", "hard"];
 
 
 export default function Grid() {
   const [data, setData] = useState(Array.from(Array(9), () => Array(9).fill(undefined)));
   const [solution, setSolution] = useState(Array.from(Array(9), () => Array(9).fill('')));
   const [grade, setGrade] = useState("easy");
-  const [flag, setFlag] = useState(false);
-  const [status, setStatus] = useState(""); // solved or unsolvable
+  const [status, setStatus] = useState("unsolved"); // solved or unsolvable
   const [inputs, setInputs] = useState(null);
   const [loading, setLoading] = useState(true);
-  // console.log(solution)
-  // console.log('data', data)
 
 
   const checkInput = (e) => {
@@ -108,7 +105,7 @@ export default function Grid() {
 
   const board = getData();
 
-  console.log(board)
+  // console.log(board)
 
 
   const getSolution = async () => {
@@ -118,34 +115,48 @@ export default function Grid() {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
     const data = await response.json();
-    // const flagTemp = await checker(board);
     setStatus(data.status)
     setData(prev => prev = data.solution);
     setSolution(data.solution);
-    // setFlag(flagTemp);
     const newInputs = render(data.solution); // render new inputs from solution
     setInputs(newInputs); // update inputs state with new inputs
   };
 
+  async function getHint() {
+    const response = await fetch('https://sugoku.onrender.com/solve', {
+      method: 'POST',
+      body: encodeParams({ board }),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+    const data = await response.json();
+    const solution = data.solution;
+    const newData = swapValuesInData(data, solution);
+    const newInputs = render(newData);
+    setData(newInputs);
+  }
 
+  function swapValuesInData(data, solution) {
+    // Copy the data array to avoid modifying the original
+    const newData = JSON.parse(JSON.stringify(data.solution));
+    
+    // Select three random cells from the solution array that are not already in the data array
+    const indices = [];
+    while (indices.length < 3) {
+      const i = Math.floor(Math.random() * solution.length);
+      const j = Math.floor(Math.random() * solution[i].length);
+      if ( !indices.some(([x, y]) => x === i && y === j)) {
+        indices.push([i, j]);
+      }
+    }
 
-  // compare board and data and find the element that is not equal and give them a color of red
-
-  // const compare = (data, board) => {
-  //   const result = []
-  //   data.forEach((row, i) => {
-  //     row.forEach((item, j) => {
-  //       if (item !== board?.[i]?.[j]) {
-  //         result.push(item)
-  //         board[i][j] = item
-  //         item.classList?.add('red')
-  //       }
-  //     })
-  //   })
-  //   console.log(result)
-  //   return result
-  // }
-
+    console.log(indices);
+    // Set the selected cells as hints in the new data array
+    for (let [i, j] of indices) {
+      newData[i][j] = solution[i][j];
+    }
+    return newData;
+  }
+  
 
   const validateSolution = async () => {
     const response = await fetch('https://sugoku.onrender.com/validate', {
@@ -159,7 +170,6 @@ export default function Grid() {
   }
 
 
-
   return (
     <>
       <h1>Sudoku Solver React</h1>
@@ -168,9 +178,9 @@ export default function Grid() {
       </div>
       <div className="buttons">
         <button onClick={getSolution}>Get Solution</button>
-        <button onClick={validateSolution}>Status : {status}</button>
+        <button style={{backgroundColor:bgColor(status)}} onClick={validateSolution}>Status : {status}</button>
         <button>Level : {grade.slice(0, 1).toUpperCase() + grade.slice(1)}</button>
-        <button onClick={getData}>Get Hint</button>
+        <button onClick={getHint}>Get Hint</button>
         <label htmlFor="difficulty-select">Difficulty:</label>
         <select id="difficulty-select" value={grade} onChange={handleDifficultyChange}>
           {difficulties.map((difficulty) => (
