@@ -30,7 +30,7 @@ export default function Grid() {
 
   const grid = document.querySelectorAll(".grid input")
   // Driver function for the grid
-  
+
   useEffect(() => {
     grid.forEach((item) => {
       item.addEventListener("input", checkInput);
@@ -162,15 +162,15 @@ export default function Grid() {
 
   return (
     <>
-      <h2>Sudoku Solver React</h2>
+      <h1>Sudoku Solver React</h1>
       <div className="grid">
-         {inputs} 
+        {inputs}
       </div>
       <div className="buttons">
         <button onClick={getSolution}>Get Solution</button>
-        <button onClick={validateSolution}>Check Status</button>
+        <button onClick={validateSolution}>Status : {status}</button>
+        <button>Level : {grade.slice(0, 1).toUpperCase() + grade.slice(1)}</button>
         <button onClick={getData}>Get Hint</button>
-      <div className="difficulty">
         <label htmlFor="difficulty-select">Difficulty:</label>
         <select id="difficulty-select" value={grade} onChange={handleDifficultyChange}>
           {difficulties.map((difficulty) => (
@@ -179,11 +179,6 @@ export default function Grid() {
             </option>
           ))}
         </select>
-      </div>
-        <div className="grade">{status}</div>
-        <div className="grade">
-        <button>Level : </button>
-        <p>{grade.slice(0, 1).toUpperCase() + grade.slice(1)}</p></div>
       </div>
     </>
   )
