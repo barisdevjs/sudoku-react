@@ -17,7 +17,13 @@ export default function Grid() {
   const [status, setStatus] = useState("unsolved"); // solved or unsolvable
   const [inputs, setInputs] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [restart, setRestart] = useState(false);
 
+
+  const handleRestart = () => {
+    setStatus("unsolved");
+    setRestart(true);
+  }
 
   const checkInput = (e) => {
     if (e.target.value.length > 1) {
@@ -26,13 +32,10 @@ export default function Grid() {
   }
 
   const grid = document.querySelectorAll(".grid input")
-  // Driver function for the grid
-
   useEffect(() => {
     grid.forEach((item) => {
       item.addEventListener("input", checkInput);
     })
-
     return () => {
       grid.forEach((item) => {
         item.removeEventListener("input", checkInput)
@@ -42,7 +45,7 @@ export default function Grid() {
 
   useEffect(() => {
     setInputs(render(data))
-  }, [])
+  }, [data])
 
   const handleChange = (e, i, j) => {
     const newData = [...data];
@@ -68,8 +71,15 @@ export default function Grid() {
       setInputs(render(board));
       setLoading(false);
     };
-    fetchData();
-  }, [grade]); // re-fetch data when difficulty level changes
+
+    if (restart) {
+      fetchData();
+      setRestart(false);
+    }
+    else {
+      fetchData();
+    }
+  }, [grade, restart]);
 
   const handleDifficultyChange = (event) => {
     setGrade(event.target.value);
@@ -105,7 +115,6 @@ export default function Grid() {
 
   const board = getData();
 
-  // console.log(board)
 
 
   const getSolution = async () => {
@@ -116,10 +125,8 @@ export default function Grid() {
     });
     const data = await response.json();
     setStatus(data.status)
-    setData(prev => prev = data.solution);
+    setData(data.solution);
     setSolution(data.solution);
-    const newInputs = render(data.solution); // render new inputs from solution
-    setInputs(newInputs); // update inputs state with new inputs
   };
 
   async function getHint() {
@@ -129,34 +136,29 @@ export default function Grid() {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
     const data = await response.json();
-    const solution = data.solution;
-    const newData = swapValuesInData(data, solution);
-    const newInputs = render(newData);
-    setData(newInputs);
+    const resBoard = data.solution;
+    const newData = await swapValuesInData(resBoard, board); // Swap arguments here
+    setData(newData);
   }
 
-  function swapValuesInData(data, solution) {
-    // Copy the data array to avoid modifying the original
-    const newData = JSON.parse(JSON.stringify(data.solution));
-    
-    // Select three random cells from the solution array that are not already in the data array
+
+  function swapValuesInData(solution, data) {
+    const newData = structuredClone(data)
+
     const indices = [];
     while (indices.length < 3) {
       const i = Math.floor(Math.random() * solution.length);
       const j = Math.floor(Math.random() * solution[i].length);
-      if ( !indices.some(([x, y]) => x === i && y === j)) {
+      if (newData[i][j] !== solution[i][j] && newData[i][j] === 0) { 
         indices.push([i, j]);
       }
     }
-
-    console.log(indices);
-    // Set the selected cells as hints in the new data array
     for (let [i, j] of indices) {
       newData[i][j] = solution[i][j];
     }
     return newData;
   }
-  
+
 
   const validateSolution = async () => {
     const response = await fetch('https://sugoku.onrender.com/validate', {
@@ -177,10 +179,6 @@ export default function Grid() {
         {inputs}
       </div>
       <div className="buttons">
-        <button onClick={getSolution}>Get Solution</button>
-        <button style={{backgroundColor:bgColor(status)}} onClick={validateSolution}>Status : {status}</button>
-        <button>Level : {grade.slice(0, 1).toUpperCase() + grade.slice(1)}</button>
-        <button onClick={getHint}>Get Hint</button>
         <label htmlFor="difficulty-select">Difficulty:</label>
         <select id="difficulty-select" value={grade} onChange={handleDifficultyChange}>
           {difficulties.map((difficulty) => (
@@ -189,6 +187,11 @@ export default function Grid() {
             </option>
           ))}
         </select>
+        <button onClick={getSolution}>Get Solution</button>
+        <button style={{ backgroundColor: bgColor(status) }} onClick={validateSolution}>Status : {status}</button>
+        <button>Level : {grade.slice(0, 1).toUpperCase() + grade.slice(1)}</button>
+        <button onClick={getHint}>Get Hint</button>
+        <button onClick={handleRestart}>Restart</button>
       </div>
     </>
   )
