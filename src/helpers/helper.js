@@ -40,22 +40,13 @@ export const difficulties = ["easy", "medium", "hard"];
 
 
 export const getData = async (grid) => {
-  return new Promise((resolve, reject) => {
-    const data = []
-    grid.forEach((item, idx) => {
-      // make 9 * 9 array
-      if (idx % 9 === 0) {
-        data.push([])
-      }
-      data[Math.floor(idx / 9)].push(Number(item.value))
-    })
-    resolve(data)
-  })
+    const data = grid.map(row => row.map(cell => cell === '' ? 0 : Number(cell)))
+    return data
 }
 
 
-export async function swapValuesInData(solution, data) {
-  const newData = await structuredClone(data)
+export  function swapValuesInData(solution, data) {
+  const newData = data
   const indices = [];
   while (indices.length < 3) {
     const i = Math.floor(Math.random() * solution.length);

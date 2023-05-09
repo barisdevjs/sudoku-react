@@ -1,19 +1,20 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
+
 
 import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
 import Cell from "./Cell"
-import { sudoku, encodeParams, bgColor, difficulties, getData, swapValuesInData, checkInput } from "../helpers/helper"
+import { sudoku, encodeParams, bgColor, difficulties, getData, swapValuesInData } from "../helpers/helper"
 import '../App.css'
 
+
+
 export default function Grid() {
-  const [data, setData] = useState(Array.from(Array(9), () => Array(9).fill(undefined)));
   const [solution, setSolution] = useState(Array.from(Array(9), () => Array(9).fill('')));
   const [grade, setGrade] = useState("easy");
   const [status, setStatus] = useState("unsolved"); // solved or unsolvable
   const [loading, setLoading] = useState(true);
   const [restart, setRestart] = useState(false);
+  const [data, setData] = useState(Array.from(Array(9), () => Array(9).fill('')));
 
 
   const handleRestart = () => {
@@ -21,41 +22,19 @@ export default function Grid() {
     setRestart(true);
   }
 
-  const grid = document.querySelectorAll(".grid input");
-
-  useEffect(() => {
-    grid.forEach((item) => {
-      item.addEventListener("input", checkInput);
-    })
-    return () => {
-      grid.forEach((item) => {
-        item.removeEventListener("input", checkInput)
-      });
-    }
-  }, [grid])
-
-
-
   const handleChange = (e, i, j) => {
     const newData = [...data];
-    newData[i][j] = Number(e.target.value);
+    newData[i][j] = e.target.value !== "" ? Number(e.target.value) : null;
     setData(newData);
-  }
+  };
 
   // replace every zero with a blank space
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const result = await apiRequest(grade); // pass selected difficulty level to apiRequest function
-      const board = result.board;
-      board.forEach((item, index) => {
-        item.forEach((item2, index2) => {
-          if (item2 === 0) {
-            board[index][index2] = "";
-          }
-        });
-      });
+      const result = await apiRequest(grade);
+      const board = result.board.map((row) => row.map((val) => (val === 0 ? "" : val)));
       setData(board);
       setLoading(false);
     };
@@ -63,11 +42,11 @@ export default function Grid() {
     if (restart) {
       fetchData();
       setRestart(false);
-    }
-    else {
+    } else {
       fetchData();
     }
   }, [grade, restart]);
+
 
   const handleDifficultyChange = (event) => {
     setGrade(event.target.value);
@@ -79,65 +58,62 @@ export default function Grid() {
       row.map((item, j) => (
         <Cell
           key={`${i}${j}`}
-          val={item}
-          grayArea={sudoku[i][j] === 1 ? 'odd' : ''}
+          val={item === 0 ? "" : item}
+          grayArea={sudoku[i][j] === 1 ? "odd" : ""}
           onChange={(e) => handleChange(e, i, j)}
         />
       ))
     );
   }
 
-  // getting for the latest data from grid board
 
+  // getting for the latest data from grid board
 
   const getSolution = async () => {
     try {
-      const board = await getData(grid);
-      const response = await fetch('https://sugoku.onrender.com/solve', {
-        method: 'POST',
+      const board = await getData(data);
+      const response = await fetch("https://sugoku.onrender.com/solve", {
+        method: "POST",
         body: encodeParams({ board }),
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
-      const data = await response.json();
-      setStatus(data.status)
-      setData(data.solution);
-      setSolution(data.solution);
+      const data1 = await response.json();
+      setStatus(data1.status);
+      setData(data1.solution);
+      setSolution(data1.solution);
     } catch (error) {
       console.error(error);
     }
   };
-  
 
   async function getHint() {
     try {
-      const board = await getData(grid);
-      const response = await fetch('https://sugoku.onrender.com/solve', {
-        method: 'POST',
-        body: encodeParams({ board }),
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      const board = await getData(data);
+      const response = await fetch("https://sugoku.onrender.com/solve", {
+        method: "POST",
+        body: encodeParams({ board: board }),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
-      const data = await response.json();
-      const resBoard = data.solution;
-      const newData = await swapValuesInData(resBoard, board); 
+      const data1 = await response.json();
+      const resBoard = data1.solution;
+      const newData = await swapValuesInData(resBoard, board);
       setData(newData);
     } catch (error) {
       console.error(error);
     }
   }
 
-
   const validateSolution = async () => {
-    const board = getData(grid);
-    const response = await fetch('https://sugoku.onrender.com/validate', {
-      method: 'POST',
-      body: encodeParams(board),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    })
-    const data = await response.json()
-    setStatus(data.status)
-    return data.status
-  }
-
+    const board = await getData(data);
+    const response = await fetch("https://sugoku.onrender.com/validate", {
+      method: "POST",
+      body: encodeParams({ board }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    const data1 = await response.json();
+    setStatus(data1.status);
+    return data1.status;
+  };
 
   return (
     <>
