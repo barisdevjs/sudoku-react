@@ -4,10 +4,8 @@
 import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
 import Cell from "./Cell"
-import { sudoku, encodeParams, bgColor } from "../helpers/helper"
+import { sudoku, encodeParams, bgColor, difficulties, grid, getData, swapValuesInData, checkInput } from "../helpers/helper"
 import '../App.css'
-
-const difficulties = ["easy", "medium", "hard"];
 
 
 export default function Grid() {
@@ -25,13 +23,6 @@ export default function Grid() {
     setRestart(true);
   }
 
-  const checkInput = (e) => {
-    if (e.target.value.length > 1) {
-      e.target.value = e.target.value.slice(0, 1)
-    }
-  }
-
-  const grid = document.querySelectorAll(".grid input")
   useEffect(() => {
     grid.forEach((item) => {
       item.addEventListener("input", checkInput);
@@ -101,23 +92,9 @@ export default function Grid() {
 
   // getting for the latest data from grid board
 
-  const getData = () => {
-    const data = []
-    grid.forEach((item, idx) => {
-      // make 9 * 9 array
-      if (idx % 9 === 0) {
-        data.push([])
-      }
-      data[Math.floor(idx / 9)].push(Number(item.value))
-    })
-    return data
-  }
-
-  const board = getData();
-
-
 
   const getSolution = async () => {
+    const board = getData();
     const response = await fetch('https://sugoku.onrender.com/solve', {
       method: 'POST',
       body: encodeParams({ board }),
@@ -130,6 +107,7 @@ export default function Grid() {
   };
 
   async function getHint() {
+    const board = getData();
     const response = await fetch('https://sugoku.onrender.com/solve', {
       method: 'POST',
       body: encodeParams({ board }),
@@ -142,28 +120,12 @@ export default function Grid() {
   }
 
 
-  function swapValuesInData(solution, data) {
-    const newData = structuredClone(data)
-
-    const indices = [];
-    while (indices.length < 3) {
-      const i = Math.floor(Math.random() * solution.length);
-      const j = Math.floor(Math.random() * solution[i].length);
-      if (newData[i][j] !== solution[i][j] && newData[i][j] === 0) { 
-        indices.push([i, j]);
-      }
-    }
-    for (let [i, j] of indices) {
-      newData[i][j] = solution[i][j];
-    }
-    return newData;
-  }
-
 
   const validateSolution = async () => {
+    const board = getData();
     const response = await fetch('https://sugoku.onrender.com/validate', {
       method: 'POST',
-      body: encodeParams(getData()),
+      body: encodeParams(board),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     })
     const data = await response.json()
@@ -188,7 +150,7 @@ export default function Grid() {
           ))}
         </select>
         <button onClick={getSolution}>Get Solution</button>
-        <button style={{ backgroundColor: bgColor(status) }} onClick={validateSolution}>Status : {status}</button>
+        <button style={{ backgroundColor: bgColor(status) }} onClick={validateSolution}>Check status : {status}</button>
         <button>Level : {grade.slice(0, 1).toUpperCase() + grade.slice(1)}</button>
         <button onClick={getHint}>Get Hint</button>
         <button onClick={handleRestart}>Restart</button>

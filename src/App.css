@@ -25,7 +25,7 @@
     padding: .5rem;
     border-radius: .25rem;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     column-gap: 1rem;
     row-gap: .5rem;
     margin-bottom: 2rem;
@@ -147,7 +147,7 @@
   }
 
   .userinput {
-    color: chocolate;
+    color: darkorange;
   }
 
   .hint {
@@ -155,7 +155,7 @@
   }
 
   .red {
-    color: greenyellow !important;
+    color: red !important;
   }
 
 
@@ -204,6 +204,13 @@
     padding-inline: 1rem;
     min-width: 40%;
     align-self: center;
+    border: none;
+    border-radius: .25rem;
+    padding: .5rem .5rem;
+    outline: none;
+    font-family: 'Roboto', sans-serif !important;
+    cursor: pointer;
+    font-size: large;
   }
 
 
@@ -220,17 +227,6 @@
   option:checked {
     background-color: #bbb;
   }
-
-  select {
-    border: none;
-    border-radius: .25rem;
-    padding: .5rem .5rem;
-    outline: none;
-    font-family: 'Roboto', sans-serif !important;
-    cursor: pointer;
-    font-size: large;
-  }
-
 
   label {
     font-size: large;
