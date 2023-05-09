@@ -4,16 +4,14 @@
 import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
 import Cell from "./Cell"
-import { sudoku, encodeParams, bgColor, difficulties, grid, getData, swapValuesInData, checkInput } from "../helpers/helper"
+import { sudoku, encodeParams, bgColor, difficulties, getData, swapValuesInData, checkInput } from "../helpers/helper"
 import '../App.css'
-
 
 export default function Grid() {
   const [data, setData] = useState(Array.from(Array(9), () => Array(9).fill(undefined)));
   const [solution, setSolution] = useState(Array.from(Array(9), () => Array(9).fill('')));
   const [grade, setGrade] = useState("easy");
   const [status, setStatus] = useState("unsolved"); // solved or unsolvable
-  const [inputs, setInputs] = useState(null);
   const [loading, setLoading] = useState(true);
   const [restart, setRestart] = useState(false);
 
@@ -22,6 +20,8 @@ export default function Grid() {
     setStatus("unsolved");
     setRestart(true);
   }
+
+  const grid = document.querySelectorAll(".grid input");
 
   useEffect(() => {
     grid.forEach((item) => {
@@ -34,9 +34,7 @@ export default function Grid() {
     }
   }, [grid])
 
-  useEffect(() => {
-    setInputs(render(data))
-  }, [data])
+
 
   const handleChange = (e, i, j) => {
     const newData = [...data];
@@ -59,7 +57,6 @@ export default function Grid() {
         });
       });
       setData(board);
-      setInputs(render(board));
       setLoading(false);
     };
 
@@ -94,35 +91,43 @@ export default function Grid() {
 
 
   const getSolution = async () => {
-    const board = getData();
-    const response = await fetch('https://sugoku.onrender.com/solve', {
-      method: 'POST',
-      body: encodeParams({ board }),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    const data = await response.json();
-    setStatus(data.status)
-    setData(data.solution);
-    setSolution(data.solution);
+    try {
+      const board = await getData(grid);
+      const response = await fetch('https://sugoku.onrender.com/solve', {
+        method: 'POST',
+        body: encodeParams({ board }),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+      const data = await response.json();
+      setStatus(data.status)
+      setData(data.solution);
+      setSolution(data.solution);
+    } catch (error) {
+      console.error(error);
+    }
   };
+  
 
   async function getHint() {
-    const board = getData();
-    const response = await fetch('https://sugoku.onrender.com/solve', {
-      method: 'POST',
-      body: encodeParams({ board }),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    const data = await response.json();
-    const resBoard = data.solution;
-    const newData = await swapValuesInData(resBoard, board); // Swap arguments here
-    setData(newData);
+    try {
+      const board = await getData(grid);
+      const response = await fetch('https://sugoku.onrender.com/solve', {
+        method: 'POST',
+        body: encodeParams({ board }),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+      const data = await response.json();
+      const resBoard = data.solution;
+      const newData = await swapValuesInData(resBoard, board); 
+      setData(newData);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
 
-
   const validateSolution = async () => {
-    const board = getData();
+    const board = getData(grid);
     const response = await fetch('https://sugoku.onrender.com/validate', {
       method: 'POST',
       body: encodeParams(board),
@@ -138,7 +143,7 @@ export default function Grid() {
     <>
       <h1>Sudoku Solver React</h1>
       <div className="grid">
-        {inputs}
+        {render(data)}
       </div>
       <div className="buttons">
         <label htmlFor="difficulty-select">Difficulty:</label>

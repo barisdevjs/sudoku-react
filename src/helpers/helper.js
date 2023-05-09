@@ -1,5 +1,6 @@
 // styling for grid element
 
+
 export let sudoku = [
   [1, 1, 1, 0, 0, 0, 1, 1, 1],
   [1, 1, 1, 0, 0, 0, 1, 1, 1],
@@ -37,19 +38,21 @@ export function bgColor(status) {
 
 export const difficulties = ["easy", "medium", "hard"];
 
-export const grid = document.querySelectorAll(".grid input");
 
-export const getData = () => {
-  const data = []
-  grid.forEach((item, idx) => {
-    // make 9 * 9 array
-    if (idx % 9 === 0) {
-      data.push([])
-    }
-    data[Math.floor(idx / 9)].push(Number(item.value))
+export const getData = async (grid) => {
+  return new Promise((resolve, reject) => {
+    const data = []
+    grid.forEach((item, idx) => {
+      // make 9 * 9 array
+      if (idx % 9 === 0) {
+        data.push([])
+      }
+      data[Math.floor(idx / 9)].push(Number(item.value))
+    })
+    resolve(data)
   })
-  return data
 }
+
 
 export async function swapValuesInData(solution, data) {
   const newData = await structuredClone(data)
