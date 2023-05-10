@@ -1,6 +1,6 @@
 import React, {  useState } from 'react';
 
-export default function Cell({ val, grayArea, onChange }) {
+export default function Cell({ val, grayArea, onChange, conflict }) {
   const [colored, setColored] = useState('');
   const handleChange = (e) => {
     onChange(e);
@@ -14,8 +14,9 @@ export default function Cell({ val, grayArea, onChange }) {
       max="9"
       value={val}
       onChange={handleChange}
-      className={`${grayArea} ${colored}`}
+      className={`${grayArea} ${colored} ${conflict}`}
       disabled={val !== '' && colored === ''}
     />
   );
 }
+

@@ -11,10 +11,12 @@ import '../App.css'
 export default function Grid() {
   const [solution, setSolution] = useState(Array.from(Array(9), () => Array(9).fill('')));
   const [grade, setGrade] = useState("easy");
-  const [status, setStatus] = useState("unsolved"); // solved or unsolvable
+  const [status, setStatus] = useState("not checked"); // solved or unsolvable
   const [loading, setLoading] = useState(true);
   const [restart, setRestart] = useState(false);
   const [data, setData] = useState(Array.from(Array(9), () => Array(9).fill('')));
+  const [conflicts, setConflicts] = useState([]);
+
 
 
   const handleRestart = () => {
@@ -23,10 +25,53 @@ export default function Grid() {
   }
 
   const handleChange = (e, i, j) => {
+    const newValue = Number(e.target.value.slice(0,1));
+    if ( newValue === "" ) setConflicts([])
+    const conflictIndices = findConflicts(data, i, j, newValue);
+    if (newValue && conflictIndices.length > 0) {
+      const newData = [...data];
+      // conflictIndices.forEach(([row, col]) => {
+      //   newData[row][col] = '33';
+      // });
+      setData(newData);
+      setConflicts(conflictIndices);
+      return;
+    }
     const newData = [...data];
-    newData[i][j] = e.target.value !== "" ? Number(e.target.value) : null;
+    newData[i][j] = newValue ;
     setData(newData);
+    setConflicts([]);
   };
+
+
+  const findConflicts = (data, row, col, value) => {
+    const conflicts = [];
+    // check if the value is already present in the same row
+    for (let j = 0; j < 9; j++) {
+      if (data[row][j] === value && j !== col) {
+        conflicts.push([row, j]);
+      }
+    }
+    // check if the value is already present in the same column
+    for (let i = 0; i < 9; i++) {
+      if (data[i][col] === value && i !== row) {
+        conflicts.push([i, col]);
+      }
+    }
+    // check if the value is already present in the same 3x3 box
+    const boxRow = Math.floor(row / 3) * 3;
+    const boxCol = Math.floor(col / 3) * 3;
+    for (let i = boxRow; i < boxRow + 3; i++) {
+      for (let j = boxCol; j < boxCol + 3; j++) {
+        if (data[i][j] === value && (i !== row || j !== col)) {
+          conflicts.push([i, j]);
+        }
+      }
+    }
+    // return the indices of the conflicting cells
+    return conflicts;
+  };
+
 
   // replace every zero with a blank space
 
@@ -53,7 +98,7 @@ export default function Grid() {
   };
 
 
-  function render(board) {
+  function render(board, conflicts) {
     return board.map((row, i) =>
       row.map((item, j) => (
         <Cell
@@ -61,10 +106,12 @@ export default function Grid() {
           val={item === 0 ? "" : item}
           grayArea={sudoku[i][j] === 1 ? "odd" : ""}
           onChange={(e) => handleChange(e, i, j)}
+          conflict={conflicts.some(([r, c]) => r === i && c === j) ? "conflict" : ""}
         />
       ))
     );
   }
+
 
 
   // getting for the latest data from grid board
@@ -119,7 +166,7 @@ export default function Grid() {
     <>
       <h1>Sudoku Solver React</h1>
       <div className="grid">
-        {render(data)}
+        {render(data, conflicts)}
       </div>
       <div className="buttons">
         <label htmlFor="difficulty-select">Difficulty:</label>

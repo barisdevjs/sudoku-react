@@ -12,7 +12,7 @@ export const apiRequest = async (difficulty) => {
 
   const timeoutId = setTimeout(() => {
     controller.abort();
-  }, 5000); // abort after 5 seconds
+  }, 10000); // abort after 5 seconds
   
   try {
     const response = await fetch(url, { signal });
@@ -22,7 +22,7 @@ export const apiRequest = async (difficulty) => {
       title: 'Success',
       html: 'Data has been fetched successfully. <br>I will close in <b></b> milliseconds.',
       icon: 'success',
-      timer: 3000,
+      timer: 2000,
       timerProgressBar: true,
       didOpen: () => {
         Swal.showLoading()
@@ -43,8 +43,16 @@ export const apiRequest = async (difficulty) => {
         text: 'Request timed out, retrying...',
         icon: 'error',
         confirmButtonText: 'Retry'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire(
+            'Deleted!',
+            'Your file has been deleted.',
+            'success'
+          )
+          return apiRequest(difficulty); // retry the request
+        }
       })
-      return apiRequest(difficulty); // retry the request
     } else {
       throw error;
     }
