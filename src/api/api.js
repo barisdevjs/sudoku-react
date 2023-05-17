@@ -12,7 +12,7 @@ export const apiRequest = async (difficulty) => {
 
   const timeoutId = setTimeout(() => {
     controller.abort();
-  }, 10000); // abort after 5 seconds
+  }, 15000); // abort after 5 seconds
   
   try {
     const response = await fetch(url, { signal });
@@ -46,7 +46,7 @@ export const apiRequest = async (difficulty) => {
       }).then((result) => {
         if (result.isConfirmed) {
           Swal.fire(
-            'Deleted!',
+            'Request Sent!',
             'Your file has been deleted.',
             'success'
           )
