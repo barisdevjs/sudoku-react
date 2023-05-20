@@ -1,11 +1,8 @@
-
-
 import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
 import Cell from "./Cell"
 import { sudoku, encodeParams, bgColor, difficulties, getData, swapValuesInData } from "../helpers/helper"
 import '../App.css'
-
 
 
 export default function Grid() {
@@ -186,10 +183,3 @@ export default function Grid() {
     </>
   )
 }
-
-
-
-
-
-
-

@@ -4,19 +4,14 @@ const BASEURL = `https://sugoku.onrender.com/board`;
 
 export const apiRequest = async (difficulty) => {
    
-  let timerInterval
   const controller = new AbortController();
   const signal = controller.signal;
   
   const url = difficulty === "random" ? `${BASEURL}` : `${BASEURL}?difficulty=${difficulty}`;
 
-  const timeoutId = setTimeout(() => {
-    controller.abort();
-  }, 15000); // abort after 5 seconds
   
   try {
     const response = await fetch(url, { signal });
-    clearTimeout(timeoutId);
     const data = await response.json();
     Swal.fire({
       title: 'Success',
@@ -24,16 +19,6 @@ export const apiRequest = async (difficulty) => {
       icon: 'success',
       timer: 2000,
       timerProgressBar: true,
-      didOpen: () => {
-        Swal.showLoading()
-        const b = Swal.getHtmlContainer().querySelector('b')
-        timerInterval = setInterval(() => {
-          b.textContent = Swal.getTimerLeft()
-        }, 100)
-      },
-      willClose: () => {
-        clearInterval(timerInterval)
-      }
     })
     return { board: data.board };
   } catch (error) {
@@ -56,5 +41,7 @@ export const apiRequest = async (difficulty) => {
     } else {
       throw error;
     }
+  } finally {
+    controller.abort()
   }
 };
