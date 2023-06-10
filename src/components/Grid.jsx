@@ -1,3 +1,4 @@
+/*eslint no-unused-vars: */
 import React, { useEffect, useState } from "react"
 import { apiRequest } from "../api/api"
 import Cell from "./Cell"
@@ -22,20 +23,17 @@ export default function Grid() {
   }
 
   const handleChange = (e, i, j) => {
-    const newValue = Number(e.target.value.slice(0,1));
-    if ( newValue === "" ) setConflicts([])
+    const newValue = Number(e.target.value.slice(0, 1));
+    if (newValue === "") setConflicts([])
     const conflictIndices = findConflicts(data, i, j, newValue);
     if (newValue && conflictIndices.length > 0) {
       const newData = [...data];
-      // conflictIndices.forEach(([row, col]) => {
-      //   newData[row][col] = '33';
-      // });
       setData(newData);
       setConflicts(conflictIndices);
       return;
     }
     const newData = [...data];
-    newData[i][j] = newValue ;
+    newData[i][j] = newValue;
     setData(newData);
     setConflicts([]);
   };
@@ -121,10 +119,10 @@ export default function Grid() {
         body: encodeParams({ board }),
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
-      const data1 = await response.json();
-      setStatus(data1.status);
-      setData(data1.solution);
-      setSolution(data1.solution);
+      const hint = await response.json();
+      setStatus(hint.status);
+      setData(hint.solution);
+      setSolution(hint.solution);
     } catch (error) {
       console.error(error);
     }
@@ -138,8 +136,8 @@ export default function Grid() {
         body: encodeParams({ board: board }),
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
-      const data1 = await response.json();
-      const resBoard = data1.solution;
+      const result = await response.json();
+      const resBoard = result.solution;
       const newData = await swapValuesInData(resBoard, board);
       setData(newData);
     } catch (error) {
@@ -154,9 +152,9 @@ export default function Grid() {
       body: encodeParams({ board }),
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
-    const data1 = await response.json();
-    setStatus(data1.status);
-    return data1.status;
+    const result = await response.json();
+    setStatus(result.status);
+    return result.status;
   };
 
   return (

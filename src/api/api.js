@@ -15,9 +15,9 @@ export const apiRequest = async (difficulty) => {
     const data = await response.json();
     Swal.fire({
       title: 'Success',
-      html: 'Data has been fetched successfully. <br>I will close in <b></b> milliseconds.',
+      html: 'Data has been fetched successfully.',
       icon: 'success',
-      timer: 2000,
+      timer: 1500,
       timerProgressBar: true,
     })
     return { board: data.board };

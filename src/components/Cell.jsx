@@ -12,6 +12,7 @@ export default function Cell({ val, grayArea, onChange, conflict }) {
       type="number"
       min="1"
       max="9"
+      name={val}
       value={val}
       onChange={handleChange}
       className={`${grayArea} ${colored} ${conflict}`}
