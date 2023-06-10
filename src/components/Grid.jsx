@@ -14,14 +14,16 @@ export default function Grid() {
   const [restart, setRestart] = useState(false);
   const [data, setData] = useState(Array.from(Array(9), () => Array(9).fill('')));
   const [conflicts, setConflicts] = useState([]);
+  const [hints, setHints] = useState(Array.from(Array(9), () => Array(9).fill(false)));
 
-
-
+  
   const handleRestart = () => {
     setStatus("unsolved");
     setRestart(true);
+    setHints(Array.from(Array(9), () => Array(9).fill(false)))
+    setStatus("not checked");
   }
-
+  
   const handleChange = (e, i, j) => {
     const newValue = Number(e.target.value.slice(0, 1));
     if (newValue === "") setConflicts([])
@@ -37,8 +39,8 @@ export default function Grid() {
     setData(newData);
     setConflicts([]);
   };
-
-
+  
+  
   const findConflicts = (data, row, col, value) => {
     const conflicts = [];
     // check if the value is already present in the same row
@@ -66,10 +68,10 @@ export default function Grid() {
     // return the indices of the conflicting cells
     return conflicts;
   };
-
-
+  
+  
   // replace every zero with a blank space
-
+  
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -78,14 +80,25 @@ export default function Grid() {
       setData(board);
       setLoading(false);
     };
-
+    
     if (restart) {
-      fetchData();
       setRestart(false);
-    } else {
       fetchData();
     }
   }, [grade, restart]);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const result = await apiRequest(grade);
+      const board = result.board.map((row) => row.map((val) => (val === 0 ? "" : val)));
+      setData(board);
+      setLoading(false);
+    };
+    fetchData()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
+  
 
 
   const handleDifficultyChange = (event) => {
@@ -102,6 +115,9 @@ export default function Grid() {
           grayArea={sudoku[i][j] === 1 ? "odd" : ""}
           onChange={(e) => handleChange(e, i, j)}
           conflict={conflicts.some(([r, c]) => r === i && c === j) ? "conflict" : ""}
+          hint={hints[i][j] === true ? "hint" : ""}
+          restart={restart}
+          mapKey={`${i}${j}`}
         />
       ))
     );
@@ -139,12 +155,18 @@ export default function Grid() {
       const result = await response.json();
       const resBoard = result.solution;
       const newData = await swapValuesInData(resBoard, board);
+  
+      const newHints = newData.map((row, i) =>
+        row.map((item, j) => item !== 0 & resBoard[i][j] !== 0 && resBoard[i][j] !== data[i][j])
+      );
+      console.log(newHints);
+      setHints(newHints);
       setData(newData);
     } catch (error) {
       console.error(error);
     }
   }
-
+  
   const validateSolution = async () => {
     const board = await getData(data);
     const response = await fetch("https://sugoku.onrender.com/validate", {

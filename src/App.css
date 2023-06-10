@@ -139,11 +139,13 @@
 }
 
 .userinput {
-  color: darkred;
+  color: white !important;
+  background-color: blue !important;
 }
 
 .hint {
-  color: green !important;
+  color: white;
+  background-color: chocolate !important;
 }
 
 .red {
