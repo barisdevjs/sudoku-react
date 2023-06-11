@@ -175,7 +175,10 @@ export default function Grid() {
           willClose: () => {
             clearInterval(timerInterval)
           }
-        }).then(() => setRestart(true));
+        }).then(() => {
+          setRestart(true);
+          setHints(Array.from(Array(9), () => Array(9).fill(false)))
+        });
       } else {
         const newData = await swapValuesInData(resBoard, board);
 
