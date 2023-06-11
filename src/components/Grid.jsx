@@ -158,11 +158,23 @@ export default function Grid() {
       const status = result.status;
       const resBoard = result.solution;
       if (status === "unsolvable") {
+        let timerInterval
         await Swal.fire({
           icon: 'error',
           title: 'Oops...',
           text: 'There is not any solution with this combination',
-          timer:4500
+          timer:3500,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading()
+            const b = Swal.getHtmlContainer().querySelector('b')
+            timerInterval = setInterval(() => {
+              b.textContent = Swal.getTimerLeft()
+            }, 100)
+          },
+          willClose: () => {
+            clearInterval(timerInterval)
+          }
         }).then(() => setRestart(true));
       } else {
         const newData = await swapValuesInData(resBoard, board);
