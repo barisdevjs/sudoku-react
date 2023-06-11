@@ -4,6 +4,8 @@ import { apiRequest } from "../api/api"
 import Cell from "./Cell"
 import { sudoku, encodeParams, bgColor, difficulties, getData, swapValuesInData } from "../helpers/helper"
 import '../App.css'
+import Spinner from "./Spinner"
+import Swal from "sweetalert2"
 
 
 export default function Grid() {
@@ -16,14 +18,14 @@ export default function Grid() {
   const [conflicts, setConflicts] = useState([]);
   const [hints, setHints] = useState(Array.from(Array(9), () => Array(9).fill(false)));
 
-  
+
   const handleRestart = () => {
     setStatus("unsolved");
     setRestart(true);
     setHints(Array.from(Array(9), () => Array(9).fill(false)))
     setStatus("not checked");
   }
-  
+
   const handleChange = (e, i, j) => {
     const newValue = Number(e.target.value.slice(0, 1));
     if (newValue === "") setConflicts([])
@@ -39,8 +41,8 @@ export default function Grid() {
     setData(newData);
     setConflicts([]);
   };
-  
-  
+
+
   const findConflicts = (data, row, col, value) => {
     const conflicts = [];
     // check if the value is already present in the same row
@@ -68,10 +70,10 @@ export default function Grid() {
     // return the indices of the conflicting cells
     return conflicts;
   };
-  
-  
+
+
   // replace every zero with a blank space
-  
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -80,13 +82,13 @@ export default function Grid() {
       setData(board);
       setLoading(false);
     };
-    
+
     if (restart) {
       setRestart(false);
       fetchData();
     }
   }, [grade, restart]);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -98,7 +100,7 @@ export default function Grid() {
     fetchData()
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
-  
+
 
 
   const handleDifficultyChange = (event) => {
@@ -153,19 +155,35 @@ export default function Grid() {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
       const result = await response.json();
+      const status = result.status;
       const resBoard = result.solution;
-      const newData = await swapValuesInData(resBoard, board);
-  
-      const newHints = newData.map((row, i) =>
-        row.map((item, j) => item !== 0 && resBoard[i][j] !== 0 && resBoard[i][j] !== data[i][j])
-      );
-      setHints(newHints);
-      setData(newData);
+      if (status === "unsolvable") {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'There is not any solution with this combination',
+          timer:4500
+        }).then(() => setRestart(true));
+      } else {
+        const newData = await swapValuesInData(resBoard, board);
+
+        const newHints = newData.map((row, i) =>
+          row.map(
+            (item, j) =>
+              item !== 0 &&
+              resBoard[i][j] !== 0 &&
+              resBoard[i][j] !== data[i][j]
+          )
+        );
+        setHints(newHints);
+        setData(newData);
+      }
     } catch (error) {
       console.error(error);
     }
   }
-  
+
+
   const validateSolution = async () => {
     const board = await getData(data);
     const response = await fetch("https://sugoku.onrender.com/validate", {
@@ -181,9 +199,10 @@ export default function Grid() {
   return (
     <>
       <h1>Sudoku Solver React</h1>
-      <div className="grid">
-        {render(data, conflicts)}
-      </div>
+      {loading ? <Spinner /> :
+        <div className="grid">
+          {render(data, conflicts)}
+        </div>}
       <div className="buttons">
         <label htmlFor="difficulty-select">Difficulty:</label>
         <select id="difficulty-select" value={grade} onChange={handleDifficultyChange}>
