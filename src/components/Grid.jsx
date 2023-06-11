@@ -157,9 +157,8 @@ export default function Grid() {
       const newData = await swapValuesInData(resBoard, board);
   
       const newHints = newData.map((row, i) =>
-        row.map((item, j) => item !== 0 & resBoard[i][j] !== 0 && resBoard[i][j] !== data[i][j])
+        row.map((item, j) => item !== 0 && resBoard[i][j] !== 0 && resBoard[i][j] !== data[i][j])
       );
-      console.log(newHints);
       setHints(newHints);
       setData(newData);
     } catch (error) {
