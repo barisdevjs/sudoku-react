@@ -1,1 +1,4 @@
-CI= npm run build
+[build]
+  publish = "build"
+  command = "echo 'default context'"
+  functions = "functions"
